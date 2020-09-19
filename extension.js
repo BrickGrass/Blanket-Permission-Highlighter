@@ -21,7 +21,7 @@ function bp_exists(username, callback) {
     ).done(callback);
 }
 
-$( document ).ready(function() {
+$(document).ready(function() {
     console.log("Highlighting authors with bp...");
     $("a").each(function() {
         let m = this.href.match(user_regex);
