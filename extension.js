@@ -58,8 +58,11 @@ $( document ).ready(function() {
 
     bp_fetch(m[1], function(data) {
         console.log(data);
+        if (data.message === "not found") {
+            return
+        }
 
-        $("#dashboard ul").last().append(
+        $("#dashboard ul").first().append(
             `<li><a href="${data.author}">FPS List Entry</a></li>`
         )
     });

@@ -35,6 +35,7 @@ def author_data(username):
     author = fetch_author(username)
 
     if not author:
-        return 201
-
+        return jsonify({"message": "not found"}), 201
+    
+    author["message"] = "found"
     return jsonify(author), 200
