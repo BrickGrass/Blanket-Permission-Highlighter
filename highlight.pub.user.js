@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Blanket Permission highlighting
 // @namespace    https://brickgrass.uk
-// @version      0.2
+// @version      0.3
 // @description  Highlights authors on ao3 who have a blanket permission statement
 // @author       BrickGrass
 // @include      https://archiveofourown.org/*
@@ -12,7 +12,7 @@
 // ==/UserScript==
 
 const user_regex = /^https:\/\/archiveofourown\.org\/users\/([^/]+)\/pseuds\/([^/]+)$/;
-var users_exist = [];
+var users = {};
 
 function bp_exists(username, context, callback) {
     $.ajax(
@@ -28,7 +28,6 @@ function bp_fetch(username, callback) {
 }
 
 $( document ).ready(function() {
-    console.log("Highlighting authors with bp...");
     $("a").each(function() {
         let m = this.href.match(user_regex);
 
@@ -36,18 +35,22 @@ $( document ).ready(function() {
             return;
         }
 
-        if (users_exist.includes(m[1])) {
-            this.css({color: "#0f782d"});
-            return;
+        if users.hasOwnProperty(m[1]) {
+            users[m[1]].push(this);
+        } else {
+            users[m[1]] = [this];
         }
+    });
 
-        bp_exists(m[1], this, function(data) {
+    for (const [un, tags] of Object.entries(object1)) {
+        bp_exists(un, {"tags": tags}, function(data) {
             if (data.exists) {
-                $(this).css({color: "#0f782d"});
-                users_exist.push(m[1]);
+                for (const tag of this.tags) {
+                    $(tag).css({color: "#0f782d"});
+                }
             }
         })
-    });
+    }
 
     let m = window.location.href.match(user_regex);
     if (m === null) {
