@@ -22,8 +22,7 @@ function bp_exists(username, context, callback) {
 
 function bp_fetch(username, callback) {
     $.ajax(
-        `https://brickgrass.uk/bp_api/author_data/${username}`,
-        {context: context}
+        `https://brickgrass.uk/bp_api/author_data/${username}`
     ).done(callback);
 }
 
@@ -63,7 +62,7 @@ $( document ).ready(function() {
         }
 
         $("#dashboard ul").first().append(
-            `<li><a href="${data.author}">FPS List Entry</a></li>`
+            `<li><a href="${data.author}?target=blank">FPS List Entry</a></li>`
         )
     });
 });
