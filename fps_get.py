@@ -34,7 +34,7 @@ class BpForm:
                 "length": -1,
                 "search[value]": "",
                 "search[regex]": "false",
-                "wdtNonce": "df227b8505",  # *seems* to be static?
+                "wdtNonce": "207785a660",  # *seems* to be static? (it's not)
                 "order[0][column]": 1,
                 "order[0][dir]": "asc"
             }
