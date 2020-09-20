@@ -1,13 +1,14 @@
 // ==UserScript==
 // @name         Blanket Permission highlighting
 // @namespace    https://brickgrass.uk
-// @version      0.8
+// @version      0.9
 // @description  Highlights authors on ao3 who have a blanket permission statement
 // @author       BrickGrass
 // @include      https://archiveofourown.org/*
 // @require      http://code.jquery.com/jquery-3.5.1.min.js
 // @require      http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js
 // @require      https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js
+// @require      https://greasyfork.org/scripts/6250-waitforkeyelements/code/waitForKeyElements.js?version=23756
 // @updateURL    https://raw.githubusercontent.com/BrickGrass/Blanket-Permission-Highlighter/master/highlight.pub.user.js
 // @downloadURL  https://raw.githubusercontent.com/BrickGrass/Blanket-Permission-Highlighter/master/highlight.pub.user.js
 // @grant        GM_setValue
@@ -140,3 +141,27 @@ $( document ).ready(function() {
         )
     });
 });
+
+function checkTag(jNode) {
+    var node = jNode.context;
+
+    let m = node.href.match(user_regex);
+
+    if (m === null) {
+        return;
+    }
+
+    if (!node.text.includes(m[1])) {
+        return;
+    }
+
+    bp_exists(m[1], {"tags": [node]}, function(data) {
+        if (data.exists) {
+            for (const tag of this.tags) {
+                $(tag).css({color: "#0f782d"});
+            }
+        }
+    });
+}
+
+waitForKeyElements("#comments_placeholder a", checkTag, false);
