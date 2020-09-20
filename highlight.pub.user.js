@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Blanket Permission highlighting
 // @namespace    https://brickgrass.uk
-// @version      0.3
+// @version      0.4
 // @description  Highlights authors on ao3 who have a blanket permission statement
 // @author       BrickGrass
 // @include      https://archiveofourown.org/*
@@ -35,7 +35,7 @@ $( document ).ready(function() {
             return;
         }
 
-        if users.hasOwnProperty(m[1]) {
+        if (users.hasOwnProperty(m[1])) {
             users[m[1]].push(this);
         } else {
             users[m[1]] = [this];
