@@ -32,6 +32,7 @@ class BpForm:
                 "draw": 1,
                 "start": 0,
                 "length": -1,
+                "search[value]": "",
                 "search[regex]": "false",
                 "wdtNonce": "df227b8505",  # *seems* to be static?
                 "order[0][column]": 1,
@@ -44,7 +45,7 @@ class BpForm:
             self.data = data
 
         search = copy.copy(self.data)
-        search["search[value]"] = author
+        search["columns[1][search][value]"] = author
 
         return search
 
@@ -88,3 +89,8 @@ class Session:
         r = self.s.post(self.remote, params=self.params, data=data, headers=self.headers, cookies=self.cookies)
 
         return r.json()
+
+
+if __name__ == "__main__":
+    sess = Session()
+    print(sess.get_author(""))

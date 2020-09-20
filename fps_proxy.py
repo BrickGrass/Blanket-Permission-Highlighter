@@ -15,12 +15,12 @@ def fetch_author(username):
 
     if data["recordsFiltered"] == 0:
         return None
-    
+
     for _, author_page, _, _, statement in data["data"]:
         author_page = BeautifulSoup(author_page)
         statement = BeautifulSoup(statement)
 
-        if author_page.string == username:
+        if author_page.string.lower() == username.lower():
             return {"author": author_page.a["href"], "statement": statement.a["href"]}
 
 
