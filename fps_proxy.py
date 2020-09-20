@@ -15,13 +15,13 @@ def fetch_author(username):
 
     if data["recordsFiltered"] == 0:
         return None
+    
+    for _, author_page, _, _, statement in data["data"]:
+        author_page = BeautifulSoup(author_page)
+        statement = BeautifulSoup(statement)
 
-    _, author_page, _, _, statement = data["data"][0]
-
-    author_page = BeautifulSoup(author_page)
-    statement = BeautifulSoup(statement)
-
-    return {"author": author_page.a["href"], "statement": statement.a["href"]}
+        if author_page.string == username:
+            return {"author": author_page.a["href"], "statement": statement.a["href"]}
 
 
 @app.route("/bp_api/author_exists/<username>")

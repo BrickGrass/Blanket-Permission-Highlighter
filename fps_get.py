@@ -31,7 +31,7 @@ class BpForm:
             data = {
                 "draw": 1,
                 "start": 0,
-                "length": 1,
+                "length": -1,
                 "search[regex]": "false",
                 "wdtNonce": "df227b8505",  # *seems* to be static?
                 "order[0][column]": 1,
