@@ -5,7 +5,6 @@
 // @description  Highlights authors on ao3 who have a blanket permission statement
 // @author       BrickGrass
 // @include      https://archiveofourown.org/*
-// @grant        GM_xmlhttpRequest
 // @require      http://code.jquery.com/jquery-3.5.1.min.js
 // @require      http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js
 // ==/UserScript==
