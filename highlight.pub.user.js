@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Blanket Permission highlighting
 // @namespace    https://brickgrass.uk
-// @version      0.5
+// @version      0.6
 // @description  Highlights authors on ao3 who have a blanket permission statement
 // @author       BrickGrass
 // @include      https://archiveofourown.org/*
@@ -11,7 +11,7 @@
 // @downloadURL  https://raw.githubusercontent.com/BrickGrass/Blanket-Permission-Highlighter/master/highlight.pub.user.js
 // ==/UserScript==
 
-const user_regex = /^https:\/\/archiveofourown\.org\/users\/([^/]+)\/pseuds\/([^/]+)$/;
+const user_regex = /https:\/\/archiveofourown\.org\/users\/([^/]+)/;
 var users = {};
 
 function bp_exists(username, context, callback) {
@@ -32,6 +32,10 @@ $( document ).ready(function() {
         let m = this.href.match(user_regex);
 
         if (m === null) {
+            return;
+        }
+
+        if (!this.text.includes(m[1])) {
             return;
         }
 
