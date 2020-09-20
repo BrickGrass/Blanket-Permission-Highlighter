@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Blanket Permission highlighting
 // @namespace    https://brickgrass.uk
-// @version      0.4
+// @version      0.5
 // @description  Highlights authors on ao3 who have a blanket permission statement
 // @author       BrickGrass
 // @include      https://archiveofourown.org/*
@@ -42,7 +42,7 @@ $( document ).ready(function() {
         }
     });
 
-    for (const [un, tags] of Object.entries(object1)) {
+    for (const [un, tags] of Object.entries(users)) {
         bp_exists(un, {"tags": tags}, function(data) {
             if (data.exists) {
                 for (const tag of this.tags) {
