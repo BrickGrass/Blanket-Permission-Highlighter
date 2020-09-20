@@ -1,17 +1,21 @@
-from functools import lru_cache
-
 from bs4 import BeautifulSoup
+from cachetools import cached, TTLCache
 from flask import Flask, jsonify
 
 import fps_get
 
 sess = fps_get.Session()
 app = Flask(__name__)
+_24_hours = 24 * 60 * 60
 
 
-@lru_cache(maxsize=500, typed=False)
+@cached(cache=TTLCache(maxsize=500, ttl=_24_hours))
 def fetch_author(username):
-    data = sess.get_author(username)
+    try:
+        data = sess.get_author(username)
+    except fps_get.NonceExpiredError:
+        sess.form.nonce = sess.get_nonce()
+        data = sess.get_author(username)
 
     if data["recordsFiltered"] == 0:
         return None
@@ -36,6 +40,6 @@ def author_data(username):
 
     if not author:
         return jsonify({"message": "not found"}), 201
-    
+
     author["message"] = "found"
     return jsonify(author), 200
