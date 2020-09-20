@@ -18,8 +18,8 @@ def fetch_author(username):
 
     _, author_page, _, _, statement = data["data"][0]
 
-    author_page = BeautifulSoup(author_page, features="lxml")
-    statement = BeautifulSoup(statement, features="lxml")
+    author_page = BeautifulSoup(author_page)
+    statement = BeautifulSoup(statement)
 
     return {"author": author_page.a["href"], "statement": statement.a["href"]}
 
