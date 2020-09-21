@@ -26,20 +26,21 @@ class BpForm:
         self.columns = columns
 
         self.nonce = None
+        self.old_nonce = None
         self.data = None
 
     def get_data(self, author):
         if not self.nonce:
             raise ValueError
 
-        if not self.data:
+        if not self.data or not self.old_nonce or self.old_nonce != self.nonce:
             data = {
                 "draw": 1,
                 "start": 0,
                 "length": -1,
                 "search[value]": "",
                 "search[regex]": "false",
-                "wdtNonce": "207785a660",  # *seems* to be static? (it's not)
+                "wdtNonce": self.nonce,
                 "order[0][column]": 1,
                 "order[0][dir]": "asc"
             }
@@ -94,7 +95,7 @@ class Session:
         return cookies
 
     def get_nonce(self):
-        r = self.s.get("https://www.fpslist.org/authors/artists/", headers=self.hdrs)
+        r = self.s.get("https://www.fpslist.org/authorsartists/", headers=self.hdrs)
         r.raise_for_status()
 
         soup = BeautifulSoup(r.text)
@@ -114,4 +115,4 @@ class Session:
 
 if __name__ == "__main__":
     sess = Session()
-    print(sess.get_author(""))
+    print(sess.get_author("BrickGrass"))
