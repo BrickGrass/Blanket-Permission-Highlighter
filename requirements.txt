@@ -3,3 +3,4 @@ flask
 requests
 gunicorn[eventlet]
 cachetools
+sentry-sdk[flask]
