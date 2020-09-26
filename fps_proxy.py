@@ -1,8 +1,22 @@
+import json
+
+import sentry_sdk
+from sentry_sdk.integrations.flask import FlaskIntegration
 from bs4 import BeautifulSoup
 from cachetools import cached, TTLCache
 from flask import Flask, jsonify
 
 import fps_get
+
+with open("config.json") as f:
+    data = json.load(f)
+    sentry_dsn = data["sentry_dsn"]
+
+sentry_sdk.init(
+    dsn=sentry_dsn,
+    integrations=[FlaskIntegration()],
+    traces_sample_rate=1.0
+)
 
 sess = fps_get.Session()
 app = Flask(__name__)
