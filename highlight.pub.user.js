@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Blanket Permission highlighting
 // @namespace    https://brickgrass.uk
-// @version      0.9
+// @version      1.0
 // @description  Highlights authors on ao3 who have a blanket permission statement
 // @author       BrickGrass
 // @include      https://archiveofourown.org/*
@@ -103,6 +103,10 @@ $( document ).ready(function() {
         }
 
         if (!this.text.includes(m[1])) {
+            return;
+        }
+
+        if($(this).parents("#kudos").length > 0) {
             return;
         }
 
