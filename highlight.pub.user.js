@@ -11,8 +11,8 @@
 // @require      https://greasyfork.org/scripts/6250-waitforkeyelements/code/waitForKeyElements.js?version=23756
 // @updateURL    https://raw.githubusercontent.com/BrickGrass/Blanket-Permission-Highlighter/master/highlight.pub.user.js
 // @downloadURL  https://raw.githubusercontent.com/BrickGrass/Blanket-Permission-Highlighter/master/highlight.pub.user.js
-// @grant        GM_setValue
-// @grant        GM_getValue
+// @grant        GM.setValue
+// @grant        GM.getValue
 // ==/UserScript==
 
 const _1_day_ago = Date.now() - 24 * 60 * 60 * 1000
@@ -34,8 +34,8 @@ function readStorage(entry) {
     }
 }
 
-function bp_exists(username, context, callback) {
-    var entry = GM_getValue(username);
+async function bp_exists(username, context, callback) {
+    var entry = await GM.getValue(username);
     entry = readStorage(entry);
 
     if (entry.hasOwnProperty("exists") && entry.exists) {
@@ -56,9 +56,9 @@ function bp_exists(username, context, callback) {
     ).done(callback).done(function(data) {
         if (cookies_enabled) {
             if (data.exists) {
-                GM_setValue(username, JSON.stringify([true, Date.now()]));
+                GM.setValue(username, JSON.stringify([true, Date.now()]));
             } else {
-                GM_setValue(username, JSON.stringify([false, Date.now()]));
+                GM.setValue(username, JSON.stringify([false, Date.now()]));
             }
         }
     });
