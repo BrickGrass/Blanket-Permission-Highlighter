@@ -99,7 +99,7 @@ class Session:
         r.raise_for_status()
 
         soup = BeautifulSoup(r.text)
-        nonce_input = soup.find("input", id="wdtNonceFrontendEdit")
+        nonce_input = soup.find("input", id="wdtNonceFrontendEdit_58")
         return nonce_input["value"]
 
     def get_author(self, username):
