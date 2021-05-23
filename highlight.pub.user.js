@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Blanket Permission highlighting
 // @namespace    https://brickgrass.uk
-// @version      1.2
+// @version      1.3
 // @description  Highlights authors on ao3 who have a blanket permission statement
 // @author       BrickGrass
 // @include      https://archiveofourown.org/*
@@ -13,8 +13,7 @@
 // @downloadURL  https://raw.githubusercontent.com/BrickGrass/Blanket-Permission-Highlighter/master/highlight.pub.user.js
 // @grant        GM.setValue
 // @grant        GM.getValue
-// @grant        GM_registerMenuCommand
-// @grant        GM_addStyle
+// @grant        GM.registerMenuCommand
 // ==/UserScript==
 
 const _1_day_ago = Date.now() - 24 * 60 * 60 * 1000
@@ -24,7 +23,7 @@ var storage_enabled = false;
 var filtering_enabled = false;
 
 // Styles for settings menu
-GM_addStyle(`
+const css = `
 #bp-settings {
   position: fixed;
   z-index: 21;
@@ -51,7 +50,7 @@ GM_addStyle(`
   #bp-settings-content {
     width: 80%;
   }
-}`);
+}`;
 
 const storage_enabled_str = Cookies.get("bp_cookies_enabled");
 if (storage_enabled_str === "yes") {
@@ -81,7 +80,7 @@ function settings_close() {
     window.location.reload();
 }
 
-GM_registerMenuCommand("Open highlighter settings", function() {
+GM.registerMenuCommand("Open highlighter settings", function() {
     const settings_menu_exists = $("#bp-settings").length;
     if (settings_menu_exists) {
         console.log("settings already open");
@@ -180,6 +179,14 @@ function modify_style(data) {
 }
 
 $( document ).ready(function() {
+    let head = document.getElementsByTagName('head')[0];
+    if (head) {
+      let style = document.createElement('style');
+      style.setAttribute('type', 'text/css');
+      style.textContent = css;
+      head.appendChild(style);
+    }
+
     if (storage_enabled_str === undefined) {
         // No cookie set, ask user if they want to enable cookies
         let flash = $(".flash").first();
