@@ -3,10 +3,16 @@
 This is a tampermonkey/greasemonkey extension which:
 1. Highlights ao3 users listed as having blanket permission in rindle's [fpslist](https://www.fpslist.org/) in green
 2. Injects a link to the fpslist author profile page to their ao3 profile page
+3. Optionally filters out non-blanket permission author's works from search/bookmark results
 
-# Example
+# Examples
 
-![alt text](https://brickgrass.uk/static/uploads/images/fps_ext_example.png "Example of extension working on ao3")
+Extension working
+![alt text](https://brickgrass.uk/media/images/fps_ext_example.png "Example of extension working on ao3")
+
+Settings menu
+![alt text](https://brickgrass.uk/media/images/tampermonkey_menu.png "Tampermonkey menu showing option to open settings for the highlighter extension")
+![alt text](https://brickgrass.uk/media/images/bph_settings.png "The settings menu for the extension")
 
 # Installation
 
