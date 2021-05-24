@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Blanket Permission highlighting
 // @namespace    https://brickgrass.uk
-// @version      1.3
+// @version      1.4
 // @description  Highlights authors on ao3 who have a blanket permission statement
 // @author       BrickGrass
 // @include      https://archiveofourown.org/*
@@ -104,8 +104,6 @@ GM.registerMenuCommand("Open highlighter settings", function() {
     const checkbox_values = [storage_enabled, filtering_enabled];
     const checkboxes = $("#bp-settings input");
     for (let i = 0; i < checkboxes.length; i++) {
-        console.log(i);
-        console.log(checkboxes[i]);
         $(checkboxes[i]).prop("checked", checkbox_values[i]);
     }
 
@@ -186,6 +184,31 @@ $( document ).ready(function() {
       style.textContent = css;
       head.appendChild(style);
     }
+
+    const ao3_filter_html = `
+    <li>
+      <label for="bp_filter">
+        <input name="bp_filter" type="hidden" value="0">
+        <input type="checkbox" value="1" name="bp_filter" id="bp_filter">
+        <span class="indicator" aria-hidden="true"></span>
+        <span>Only works with authors who give blanket permission for transformative works</span>
+      </label>
+    </li>`
+
+    // bookmark filters
+    $(".filters .options > ul").append(ao3_filter_html);
+    // tag filters
+    $(".filters .more.group > dl").prepend(`<dd>${ao3_filter_html}</dd>`);
+
+    $("#bp_filter").prop("checked", filtering_enabled);
+    $("#bp_filter").change(function() {
+        filtering_enabled = this.checked;
+        Cookies.set(
+            "bp_filtering_enabled",
+            filtering_enabled ? "yes" : "no",
+            {expires: 365 * 10});
+        }
+    );
 
     if (storage_enabled_str === undefined) {
         // No cookie set, ask user if they want to enable cookies
