@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Blanket Permission highlighting
 // @namespace    https://brickgrass.uk
-// @version      1.4
+// @version      1.5
 // @description  Highlights authors on ao3 who have a blanket permission statement
 // @author       BrickGrass
 // @include      https://archiveofourown.org/*
@@ -19,38 +19,73 @@
 const _1_day_ago = Date.now() - 24 * 60 * 60 * 1000
 const user_regex = /https:\/\/archiveofourown\.org\/users\/([^/]+)/;
 var users = {};
-var storage_enabled = false;
-var filtering_enabled = false;
+
+const bp_settings_html = `
+<div id="bp-settings">
+    <div id="bp-settings-content">
+        <h2>Blanket Permission Highlighter Settings</h2>
+        <form>
+            <input type="checkbox" id="enable-storage" name="enable-storage">
+            <label for="enable-storage">Enable Storage/Caching</label><br>
+            <input type="checkbox" id="enable-filter" name="enable-filter">
+            <label for="enable-filter">Enable Filtering Of Non-Blanket Permission User's Works</label><br>
+            <input type="checkbox" id="enable-orphan-bp" name="enable-orphan-bp">
+            <label for="enable-orphan-bp">Enable Treating The AO3 <a href="/users/orphan_account">orphan_account</a> As Having Blanket Permission</label><br>
+            <input type="color" id="colour" name="colour">
+            <label for="colour">Choose Highlight Colour</label><br>
+        </form>
+        <button id="bp-settings-close">Close</button>
+    </div>
+</div>`
+
+const ao3_filter_html = `
+<li>
+    <label for="bp_filter">
+    <input name="bp_filter" type="hidden" value="0">
+    <input type="checkbox" value="1" name="bp_filter" id="bp_filter">
+    <span class="indicator" aria-hidden="true"></span>
+    <span>Only works with authors who give blanket permission for transformative works</span>
+    </label>
+</li>`
 
 // Styles for settings menu
 const css = `
 #bp-settings {
-  position: fixed;
-  z-index: 21;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-  background-color: rgba(0, 0, 0, 0.4);
+    position: fixed;
+    z-index: 21;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
 }
 
 #bp-settings-content {
-  background-color: #fff;
-  margin: 10% auto;
-  padding: 1em;
-  width: 500px;
+    background-color: #fff;
+    margin: 10% auto;
+    padding: 1em;
+    width: 500px;
 }
 
 #bp-settings-content form {
-  margin: 1em auto;
+    margin: 1em auto;
+}
+
+#bp-settings input[type=color] {
+    width: 30px;
 }
 
 @media only screen and (max-width: 625px) {
-  #bp-settings-content {
-    width: 80%;
-  }
+    #bp-settings-content {
+        width: 80%;
+    }
 }`;
+
+var storage_enabled = false;
+var filtering_enabled = false;
+var orphan_bp_enabled = false;
+var highlight_colour = "#0f782d";
 
 const storage_enabled_str = Cookies.get("bp_cookies_enabled");
 if (storage_enabled_str === "yes") {
@@ -60,9 +95,17 @@ const filtering_enabled_str = Cookies.get("bp_filtering_enabled");
 if (filtering_enabled_str === "yes") {
     filtering_enabled = true;
 }
+const orphan_bp_enabled_str = Cookies.get("bp_orphan_enabled");
+if (orphan_bp_enabled_str === "yes") {
+    orphan_bp_enabled = true;
+}
+const highlight_colour_str = Cookies.get("bp_highlight_colour");
+if (!(highlight_colour_str === undefined)) {
+    highlight_colour = highlight_colour_str;
+}
 
 function settings_close() {
-    const checkboxes = $("#bp-settings input");
+    const checkboxes = $("#bp-settings input[type=checkbox]");
     storage_enabled = $(checkboxes[0]).is(":checked");
     Cookies.set(
         "bp_cookies_enabled",
@@ -73,6 +116,15 @@ function settings_close() {
         "bp_filtering_enabled",
         filtering_enabled ? "yes" : "no",
         {expires: 365 * 10});
+
+    orphan_bp_enabled = $(checkboxes[2]).is(":checked")
+    Cookies.set(
+        "bp_orphan_enabled",
+        orphan_bp_enabled ? "yes" : "no",
+        {expires: 365 * 10});
+
+    let colour = $("#bp-settings input[type=color]").val();
+    Cookies.set("bp_highlight_colour", colour, {expires: 365 * 10});
 
     $("#bp-settings").remove();
     console.log("settings closed");
@@ -87,25 +139,14 @@ GM.registerMenuCommand("Open highlighter settings", function() {
         return;
     }
 
-    $("body").prepend(`
-<div id="bp-settings">
-  <div id="bp-settings-content">
-    <h2>Blanket Permission Highlighter Settings</h2>
-    <form>
-      <input type="checkbox" id="enable-storage" name="enable-storage"></input>
-      <label for="enable-storage">Enable Storage/Caching</label><br>
-      <input type="checkbox" id="enable-filter" name="enable-filter"></input>
-      <label for="enable-filter">Enable Filtering Of Non-Blanket Permission User's Works</label><br>
-    </form>
-    <button id="bp-settings-close">Close</button>
-  </div>
-</div>`);
+    $("body").prepend(bp_settings_html);
 
-    const checkbox_values = [storage_enabled, filtering_enabled];
-    const checkboxes = $("#bp-settings input");
+    const checkbox_values = [storage_enabled, filtering_enabled, orphan_bp_enabled];
+    const checkboxes = $("#bp-settings input[type=checkbox]");
     for (let i = 0; i < checkboxes.length; i++) {
         $(checkboxes[i]).prop("checked", checkbox_values[i]);
     }
+    $("#bp-settings input[type=color]").val(highlight_colour);
 
     $("#bp-settings-close").click(settings_close);
     console.log("settings opened");
@@ -121,6 +162,16 @@ function readStorage(entry) {
 }
 
 async function bp_exists(username, context, callback) {
+    if (username === "orphan_account") {
+        if (orphan_bp_enabled) {
+            callback.call(context, {exists: true});
+            return;
+        } else {
+            callback.call(context, {exists: false});
+            return;
+        }
+    }
+
     var entry = await GM.getValue(username);
     entry = readStorage(entry);
 
@@ -131,8 +182,8 @@ async function bp_exists(username, context, callback) {
         }
     } else if (entry.hasOwnProperty("exists") && !entry.exists) {
         if (entry.age > _1_day_ago) {
-            callback.call(context, false);
-            return
+            callback.call(context, {exists: false});
+            return;
         }
     }
 
@@ -159,7 +210,7 @@ function bp_fetch(username, callback) {
 function modify_style(data) {
     if (data.exists) {
         for (const tag of this.tags) {
-            $(tag).css({color: "#0f782d"});
+            $(tag).css({color: highlight_colour});
         }
     } else {
         if (!filtering_enabled) {
@@ -177,27 +228,17 @@ function modify_style(data) {
 }
 
 $( document ).ready(function() {
+    // Add custom css
     let head = document.getElementsByTagName('head')[0];
     if (head) {
-      let style = document.createElement('style');
-      style.setAttribute('type', 'text/css');
-      style.textContent = css;
-      head.appendChild(style);
+        let style = document.createElement('style');
+        style.setAttribute('type', 'text/css');
+        style.textContent = css;
+        head.appendChild(style);
     }
 
-    const ao3_filter_html = `
-    <li>
-      <label for="bp_filter">
-        <input name="bp_filter" type="hidden" value="0">
-        <input type="checkbox" value="1" name="bp_filter" id="bp_filter">
-        <span class="indicator" aria-hidden="true"></span>
-        <span>Only works with authors who give blanket permission for transformative works</span>
-      </label>
-    </li>`
-
-    // bookmark filters
+    // Add filter to ao3 filter form, update cookie on every change event
     $(".filters .options > ul").append(ao3_filter_html);
-    // tag filters
     $(".filters .more.group > dl").prepend(`<dd>${ao3_filter_html}</dd>`);
 
     $("#bp_filter").prop("checked", filtering_enabled);
@@ -219,21 +260,21 @@ $( document ).ready(function() {
             `Blanket Permission Highlighter: Do you wish to <a href="#" id="en_bp_cookies">enable</a> or permanently <a href="#" id="dis_bp_cookies">disable</a> storage for this extension?`
         );
 
-        $("#en_bp_cookies").click(function() {
-            Cookies.set("bp_cookies_enabled", "yes", {expires: 365 * 10})
-            storage_enabled = true;
-
+        function callback(enabled, event) {
+            Cookies.set(
+                "bp_cookies_enabled",
+                enabled ? "yes" : "no",
+                {expires: 365 * 10});
+            storage_enabled = enabled;
             flash.empty();
             flash.removeClass("notice");
-        })
-        $("#dis_bp_cookies").click(function() {
-            Cookies.set("bp_cookies_enabled", "no", {expires: 365 * 10})
+        }
 
-            flash.empty();
-            flash.removeClass("notice");
-        })
+        $("#en_bp_cookies").click(callback.bind($, true));
+        $("#dis_bp_cookies").click(callback.bind($, false));
     }
 
+    // Find all mentions of archive users by iterating all links in page
     $("a").each(function() {
         let m = this.href.match(user_regex);
 
@@ -256,16 +297,29 @@ $( document ).ready(function() {
         }
     });
 
+    // Check all users found for bp
     for (const [un, tags] of Object.entries(users)) {
         bp_exists(un, {"tags": tags}, modify_style)
     }
 
+    // If filtering is enabled, works by Anonymous users need to be hidden
+    if (filtering_enabled) {
+        $("li[role=article]").each(function() {
+            let heading = $(this).find("h4.heading");
+            let text = heading.text();
+            text = text.replace(/\r?\n|\r/g, ""); // remove newlines
+            text = text.replace(/  +/g, " "); // multiple spaces -> single space
+            if (text.includes("by Anonymous")) {
+                $(this).css({display: "none"});
+            }
+        });
+    }
+
+    // check if on profile, add link to FPS List entry if so
     let m = window.location.href.match(user_regex);
     if (m === null) {
         return;
     }
-
-    console.log("On a profile, fetching bp info...")
 
     bp_fetch(m[1], function(data) {
         console.log(data);
@@ -279,6 +333,7 @@ $( document ).ready(function() {
     });
 });
 
+// Highlight users in comments after they are dynamically loaded
 function checkTag(jNode) {
     var node = jNode.context;
 
