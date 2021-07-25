@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Blanket Permission highlighting
 // @namespace    https://brickgrass.uk
-// @version      1.5
+// @version      1.6
 // @description  Highlights authors on ao3 who have a blanket permission statement
 // @author       BrickGrass
 // @include      https://archiveofourown.org/*
@@ -47,6 +47,16 @@ const ao3_filter_html = `
     <span>Only works with authors who give blanket permission for transformative works</span>
     </label>
 </li>`
+
+const ao3_search_filter_html = `
+<dt>
+    <label for="bp_filter">Only works with authors who give blanket permission for transformative works</label>
+</dt>
+<dd>
+    <input name="bp_filter" type="hidden" value="0">
+    <input type="checkbox" value="1" name="bp_filter" id="bp_filter">
+</dd>
+`
 
 // Styles for settings menu
 const css = `
@@ -240,6 +250,8 @@ $( document ).ready(function() {
     // Add filter to ao3 filter form, update cookie on every change event
     $(".filters .options > ul").append(ao3_filter_html);
     $(".filters .more.group > dl").prepend(`<dd>${ao3_filter_html}</dd>`);
+    $("form[action='/bookmarks/search'] fieldset dl").append(ao3_search_filter_html);
+    $("form[action='/works/search'] fieldset dl").append(ao3_search_filter_html);
 
     $("#bp_filter").prop("checked", filtering_enabled);
     $("#bp_filter").change(function() {
