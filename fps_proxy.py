@@ -3,7 +3,7 @@ import json
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
 from bs4 import BeautifulSoup
-from cachetools import cached, TTLCache
+from memoization import cached, CachingAlgorithmFlag
 from flask import Flask, jsonify
 
 import fps_get
@@ -23,7 +23,7 @@ app = Flask(__name__)
 _24_hours = 24 * 60 * 60
 
 
-@cached(cache=TTLCache(maxsize=500, ttl=_24_hours))
+@cached(max_size=750, algorithm=CachingAlgorithmFlag.LFU, ttl=_24_hours)
 def fetch_author(username):
     try:
         data = sess.get_author(username)
@@ -57,3 +57,14 @@ def author_data(username):
 
     author["message"] = "found"
     return jsonify(author), 200
+
+
+@app.route("/bp_api/cache_health")
+def cache_health():
+    cache_info = fetch_author.cache_info()
+    cache_health = {
+        "hits": cache_info.hits,
+        "misses": cache_info.misses,
+        "current_size": cache_info.current_size,
+    }
+    return jsonify(cache_health), 200

@@ -2,5 +2,5 @@ bs4
 flask
 requests
 gunicorn[eventlet]
-cachetools
+memoization
 sentry-sdk[flask]
