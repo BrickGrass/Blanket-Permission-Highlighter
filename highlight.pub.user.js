@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Blanket Permission highlighting
 // @namespace    https://brickgrass.uk
-// @version      1.6
+// @version      1.7
 // @description  Highlights authors on ao3 who have a blanket permission statement
 // @author       BrickGrass
 // @include      https://archiveofourown.org/*
@@ -13,6 +13,8 @@
 // @downloadURL  https://raw.githubusercontent.com/BrickGrass/Blanket-Permission-Highlighter/master/highlight.pub.user.js
 // @grant        GM.setValue
 // @grant        GM.getValue
+// @grant        GM.listValues
+// @grant        GM.deleteValue
 // @grant        GM.registerMenuCommand
 // ==/UserScript==
 
@@ -237,7 +239,32 @@ function modify_style(data) {
     }
 }
 
+async function clear_storage() {
+    var values = await GM.listValues();
+    for (const value of values) {
+        var entry = await GM.getValue(value);
+        entry = readStorage(entry);
+        if (entry.age < _1_day_ago) {
+            GM.deleteValue(value);
+        }
+    }
+}
+
+async function log_storage() {
+    var values = await GM.listValues();
+    var mapping = {}
+    for (const value of values) {
+        var entry = await GM.getValue(value);
+        entry = readStorage(entry);
+        mapping[value] = entry;
+    }
+    console.log(mapping);
+}
+
 $( document ).ready(function() {
+    // Remove expired keys from storage
+    clear_storage();
+
     // Add custom css
     let head = document.getElementsByTagName('head')[0];
     if (head) {
