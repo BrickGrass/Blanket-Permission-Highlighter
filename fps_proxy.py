@@ -27,7 +27,8 @@ r = Redis()
 
 
 def fetch_author(username):
-    if value := r.get(username):
+    value = r.get(username)
+    if value:
         return None if value == b"n" else {"author": value.decode("utf-8")}
 
     try:
