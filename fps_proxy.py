@@ -65,3 +65,15 @@ def author_data(username):
 
     author["message"] = "found"
     return jsonify(author), 200
+
+
+@app.route("/bp_api/cache_health")
+def cache_health():
+    redis_info = r.info()
+    return jsonify({
+        "hits": redis_info.get("keyspace_hits"),
+        "misses": redis_info.get("keyspace_misses"),
+        "used_memory": redis_info.get("used_memory_human"),
+        "evicted_keys": redis_info.get("evicted_keys"),
+        "expired_keys": redis_info.get("expired_keys")
+    }), 200
