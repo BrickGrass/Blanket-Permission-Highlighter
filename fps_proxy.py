@@ -76,5 +76,5 @@ def cache_health():
         "used_memory": redis_info.get("used_memory_human"),
         "evicted_keys": redis_info.get("evicted_keys"),
         "expired_keys": redis_info.get("expired_keys"),
-        "keyspace": redis_info.get("db0")
+        "keys": redis_info.get("db0").get("keys")
     }), 200
