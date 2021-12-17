@@ -21,7 +21,7 @@ sentry_sdk.init(
 
 sess = fps_get.Session()
 app = Flask(__name__)
-_24_hours = timedelta(days=1)
+cache_time = timedelta(days=3)
 
 r = Redis()
 
@@ -43,10 +43,10 @@ def fetch_author(username):
 
             if author_page.string.lower() == username.lower():
                 author_data = author_page.a["href"]
-                r.setex(username, _24_hours, author_data)
+                r.setex(username, cache_time, author_data)
                 return {"author": author_data}
 
-    r.setex(username, _24_hours, "n")
+    r.setex(username, cache_time, "n")
     return None
 
 
