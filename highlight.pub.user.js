@@ -1,11 +1,10 @@
 // ==UserScript==
 // @name         Blanket Permission highlighting
 // @namespace    https://brickgrass.uk
-// @version      1.8
+// @version      1.9
 // @description  Highlights authors on ao3 who have a blanket permission statement
 // @author       BrickGrass
 // @include      https://archiveofourown.org/*
-// @require      http://code.jquery.com/jquery-3.5.1.min.js
 // @require      http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js
 // @require      https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js
 // @updateURL    https://raw.githubusercontent.com/BrickGrass/Blanket-Permission-Highlighter/master/highlight.pub.user.js
