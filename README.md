@@ -14,7 +14,7 @@ Extension working
 Settings menu
 
 ![alt text](https://brickgrass.uk/media/images/tampermonkey_menu.png "Tampermonkey menu showing option to open settings for the highlighter extension")
-![alt text](https://brickgrass.uk/media/images/bph_settings.png "The settings menu for the extension")
+![alt text](https://brickgrass.uk/media/images/bph_settings.png? "The settings menu for the extension")
 
 # Installation
 
