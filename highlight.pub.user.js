@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Blanket Permission highlighting
 // @namespace    https://brickgrass.uk
-// @version      1.9
+// @version      2.0
 // @description  Highlights authors on ao3 who have a blanket permission statement
 // @author       BrickGrass
 // @include      https://archiveofourown.org/*
@@ -73,6 +73,7 @@ const css = `
 
 #bp-settings-content {
     background-color: #fff;
+    color: #2a2a2a;
     margin: 10% auto;
     padding: 1em;
     width: 500px;
@@ -84,6 +85,39 @@ const css = `
 
 #bp-settings input[type=color] {
     width: 30px;
+}
+
+#bp-settings a {
+    color: #111;
+}
+
+#bp-settings a:hover {
+    color: #999;
+}
+
+#bp-settings button {
+    background: #eee;
+    color: #444;
+    width: auto;
+    font-size: 100%;
+    line-height: 1.286;
+    height: 1.286em;
+    vertical-align: middle;
+    display: inline-block;
+    padding: 0.25em 0.75em;
+    white-space: nowrap;
+    overflow: visible;
+    position: relative;
+    text-decoration: none;
+    border: 1px solid #bbb;
+    border-bottom: 1px solid #aaa;
+    background-image: -moz-linear-gradient(#fff 2%,#ddd 95%,#bbb 100%);
+    background-image: -webkit-linear-gradient(#fff 2%,#ddd 95%,#bbb 100%);
+    background-image: -o-linear-gradient(#fff 2%,#ddd 95%,#bbb 100%);
+    background-image: -ms-linear-gradient(#fff 2%,#ddd 95%,#bbb 100%);
+    background-image: linear-gradient(#fff 2%,#ddd 95%,#bbb 100%);
+    border-radius: 0.25em;
+    box-shadow: none;
 }
 
 @media only screen and (max-width: 625px) {
