@@ -21,7 +21,7 @@ sentry_sdk.init(
 
 sess = fps_get.Session()
 app = Flask(__name__)
-cache_time = timedelta(days=3)
+cache_time = timedelta(days=7)
 
 r = Redis()
 
