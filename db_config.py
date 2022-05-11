@@ -19,11 +19,7 @@ conn = psycopg2.connect(
 def create_database():
     """Create database table"""
     cur = conn.cursor()
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS users (
-        user VARCAHR(255) PRIMARY KEY
-    );
-    """)
+    cur.execute("CREATE TABLE IF NOT EXISTS users (username VARCHAR(255) UNIQUE NOT NULL);")
     conn.commit()
     cur.close()
 
@@ -39,7 +35,7 @@ def populate_database(csv_name):
         csv_reader = csv.reader(csv_file)
         # TODO: If this is slow, rewrite it to do it in a single insert, lol
         for row in csv_reader:
-            cur.execute("INSERT INTO users (user) VALUES (%s)", (row[0],))
+            cur.execute("INSERT INTO users (username) VALUES (%s)", (row[0],))
 
     conn.commit()
     cur.close()

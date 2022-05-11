@@ -39,7 +39,7 @@ def fetch_author(username: str) -> bool:
     if value:
         return False if value == b"n" else True
 
-    cur.execute("SELECT user FROM users WHERE user = %s", (username,))
+    cur.execute("SELECT username FROM users WHERE user = %s", (username,))
     row = cur.fetchone()
 
     if row:
