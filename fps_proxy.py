@@ -17,7 +17,7 @@ with open("config.json") as f:
 
 sess = fps_get.Session()
 app = Flask(__name__)
-cache_time = timedelta(days=7)
+cache_time = timedelta(days=2)
 r = Redis()
 
 # TODO: Can't remember if using a single cursor for everything gets handled sensibly by flask
@@ -39,7 +39,7 @@ def fetch_author(username: str) -> bool:
     if value:
         return False if value == b"n" else True
 
-    cur.execute("SELECT username FROM users WHERE user = %s", (username,))
+    cur.execute("SELECT username FROM users WHERE username = %s", (username,))
     row = cur.fetchone()
 
     if row:

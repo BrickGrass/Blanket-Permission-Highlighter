@@ -35,7 +35,8 @@ def populate_database(csv_name):
         csv_reader = csv.reader(csv_file)
         # TODO: If this is slow, rewrite it to do it in a single insert, lol
         for row in csv_reader:
-            cur.execute("INSERT INTO users (username) VALUES (%s)", (row[0],))
+            username = row[0]
+            cur.execute("INSERT INTO users (username) VALUES (%s)", (username.lower(),))
 
     conn.commit()
     cur.close()
