@@ -4,3 +4,4 @@ requests
 gunicorn[eventlet]
 redis
 sentry-sdk[flask]
+psycopg2

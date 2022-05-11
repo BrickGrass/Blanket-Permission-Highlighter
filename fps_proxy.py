@@ -1,36 +1,61 @@
 from datetime import timedelta
 import json
 
-import sentry_sdk
-from sentry_sdk.integrations.flask import FlaskIntegration
 from bs4 import BeautifulSoup
 from redis import Redis
 from flask import Flask, jsonify
+import psycopg2
+from typing import Optional
 
 import fps_get
 
 with open("config.json") as f:
     data = json.load(f)
-    sentry_dsn = data["sentry_dsn"]
-
-sentry_sdk.init(
-    dsn=sentry_dsn,
-    integrations=[FlaskIntegration()],
-    traces_sample_rate=1.0
-)
+    database_name = data["database_name"]
+    database_username = data["database_username"]
+    database_password = data["database_password"]
 
 sess = fps_get.Session()
 app = Flask(__name__)
 cache_time = timedelta(days=7)
-
 r = Redis()
 
+# TODO: Can't remember if using a single cursor for everything gets handled sensibly by flask
+# what with the multiple threads. I don't really have time to do it properly if so anyways. This might
+# be good if I really do need to: https://gist.github.com/vulcan25/55ce270d76bf78044d067c51e23ae5ad
+conn = psycopg2.connect(
+    host="localhost",
+    dbname=database_name,
+    user=database_username,
+    password=database_password)
+cur = conn.cursor()
 
-def fetch_author(username):
+
+def fetch_author(username: str) -> bool:
+    """Discover if an author has blanket permission from the local database and redis cache"""
+    username = username.lower()
+
     value = r.get(username)
     if value:
-        return None if value == b"n" else {"author": value.decode("utf-8")}
+        return False if value == b"n" else True
 
+    cur.execute("SELECT user FROM users WHERE user = %s", (username,))
+    row = cur.fetchone()
+
+    if row:
+        r.setex(username, cache_time, "y")
+        return True
+
+    r.setex(username, cache_time, "n")
+    return False
+
+
+def fetch_author_from_web(username: str) -> Optional[dict]:
+    """Discover if an author has an fpslist.org page
+
+    TODO: Might be a good idea to still cache this, just under a separate prefix from the other data.
+    data.<username> or something like that.
+    """
     try:
         data = sess.get_author(username)
     except fps_get.NonceExpiredError:
@@ -43,22 +68,20 @@ def fetch_author(username):
 
             if author_page.string.lower() == username.lower():
                 author_data = author_page.a["href"]
-                r.setex(username, cache_time, author_data)
                 return {"author": author_data}
 
-    r.setex(username, cache_time, "n")
     return None
 
 
 @app.route("/bp_api/author_exists/<username>")
 def author_exists(username):
     author = fetch_author(username)
-    return jsonify({"exists": bool(author)}), 200
+    return jsonify({"exists": author}), 200
 
 
 @app.route("/bp_api/author_data/<username>")
 def author_data(username):
-    author = fetch_author(username)
+    author = fetch_author_from_web(username)
 
     if not author:
         return jsonify({"message": "not found"}), 201

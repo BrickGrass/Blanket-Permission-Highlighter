@@ -1,3 +1,5 @@
 {
-    "sentry_dsn": "dsn-url-goes-here"
+    "database_name": "",
+    "database_username": "",
+    "database_password": ""
 }
