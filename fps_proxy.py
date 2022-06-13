@@ -63,7 +63,7 @@ def fetch_author_from_web(username: str) -> Optional[dict]:
         data = sess.get_author(username)
 
     if data["recordsFiltered"] != 0:
-        for _, author_page, _, _, _ in data["data"]:
+        for _, author_page, _, _, _, _ in data["data"]:
             author_page = BeautifulSoup(author_page)
 
             if author_page.string.lower() == username.lower():
