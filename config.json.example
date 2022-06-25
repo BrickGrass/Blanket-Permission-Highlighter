@@ -1,5 +1,6 @@
 {
     "database_name": "",
     "database_username": "",
-    "database_password": ""
+    "database_password": "",
+    "last_updated": ""
 }
