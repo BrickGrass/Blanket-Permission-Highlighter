@@ -108,7 +108,7 @@ class Session:
         nonce_request = self.session.get("https://www.fpslist.org/extensionlist/", headers=self.hdrs)
         nonce_request.raise_for_status()
 
-        soup = BeautifulSoup(nonce_request.text)
+        soup = BeautifulSoup(nonce_request.text, features="html.parser")
         nonce_70 = soup.find("input", id="wdtNonceFrontendEdit_70")["value"]
         nonce_71 = soup.find("input", id="wdtNonceFrontendEdit_71")["value"]
 
@@ -118,6 +118,8 @@ class Session:
 
         data = self.get_wdtable(FORM_DATA_70, nonce_70, 70)
         populate_database_json(data)
+
+        print(f"Remote was updated at {last_updated}, database updated.")
 
         with open("config.json", "w") as f:
             config_data["last_updated"] = last_updated
