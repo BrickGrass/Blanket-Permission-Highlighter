@@ -61,7 +61,10 @@ def populate_database(csv_name):
         # TODO: If this is slow, rewrite it to do it in a single insert, lol
         for row in csv_reader:
             username = row[0]
-            cur.execute("INSERT INTO users (username) VALUES (%s)", (username.lower(),))
+            try:
+                cur.execute("INSERT INTO users (username) VALUES (%s)", (username.lower(),))
+            except psycopg2.UniqueViolation:
+                print(f"Ignoring duplicate user: {username.lower()}")
 
     conn.commit()
     cur.close()
@@ -72,7 +75,6 @@ def populate_database_json(json_data):
     cur = conn.cursor()
 
     cur.execute("DELETE FROM users")
-    conn.commit()
 
     for row in json_data["data"]:
         username = row[0]
