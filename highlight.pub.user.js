@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Blanket Permission highlighting
 // @namespace    https://brickgrass.uk
-// @version      2.0
+// @version      2.1
 // @description  Highlights authors on ao3 who have a blanket permission statement
 // @author       BrickGrass
 // @include      https://archiveofourown.org/*
@@ -29,6 +29,8 @@ const bp_settings_html = `
             <label for="enable-storage">Enable Storage/Caching</label><br>
             <input type="checkbox" id="enable-filter" name="enable-filter">
             <label for="enable-filter">Enable Filtering Of Non-Blanket Permission User's Works</label><br>
+            <input type="checkbox" id="enable-minimisation" name="enable-minimisation">
+            <label for="enable-minimisation">Enable Minimisation Of Non-Blanket Permission User's Works</label><br>
             <input type="checkbox" id="enable-orphan-bp" name="enable-orphan-bp">
             <label for="enable-orphan-bp">Enable Treating The AO3 <a href="/users/orphan_account">orphan_account</a> As Having Blanket Permission</label><br>
             <input type="color" id="colour" name="colour">
@@ -130,6 +132,7 @@ var storage_enabled = false;
 var filtering_enabled = false;
 var orphan_bp_enabled = false;
 var highlight_colour = "#0f782d";
+var minimise_articles = true;
 
 const storage_enabled_str = Cookies.get("bp_cookies_enabled");
 if (storage_enabled_str === "yes") {
@@ -147,6 +150,10 @@ const highlight_colour_str = Cookies.get("bp_highlight_colour");
 if (!(highlight_colour_str === undefined)) {
     highlight_colour = highlight_colour_str;
 }
+const minimise_articles_str = Cookies.get("bp_minimise_articles");
+if (minimise_articles_str === "no") {
+    minimise_articles = false;
+}
 
 function settings_close() {
     const checkboxes = $("#bp-settings input[type=checkbox]");
@@ -155,13 +162,20 @@ function settings_close() {
         "bp_cookies_enabled",
         storage_enabled ? "yes" : "no",
         {expires: 365 * 10});
-    filtering_enabled = $(checkboxes[1]).is(":checked")
+
+    filtering_enabled = $(checkboxes[1]).is(":checked");
     Cookies.set(
         "bp_filtering_enabled",
         filtering_enabled ? "yes" : "no",
         {expires: 365 * 10});
 
-    orphan_bp_enabled = $(checkboxes[2]).is(":checked")
+    minimise_articles = $(checkboxes[2]).is(":checked");
+    Cookies.set(
+        "bp_minimise_articles",
+        minimise_articles ? "yes" : "no",
+        {expires: 365 * 10});
+
+    orphan_bp_enabled = $(checkboxes[3]).is(":checked");
     Cookies.set(
         "bp_orphan_enabled",
         orphan_bp_enabled ? "yes" : "no",
@@ -185,7 +199,7 @@ GM.registerMenuCommand("Open highlighter settings", function() {
 
     $("body").prepend(bp_settings_html);
 
-    const checkbox_values = [storage_enabled, filtering_enabled, orphan_bp_enabled];
+    const checkbox_values = [storage_enabled, filtering_enabled, minimise_articles, orphan_bp_enabled];
     const checkboxes = $("#bp-settings input[type=checkbox]");
     for (let i = 0; i < checkboxes.length; i++) {
         $(checkboxes[i]).prop("checked", checkbox_values[i]);
@@ -266,7 +280,62 @@ function modify_style(data) {
                 continue;
             }
 
-            $(tag).closest("li[role=article]").css({display: "none"});
+            var article = $(tag).closest("li[role=article]");
+
+            if (!minimise_articles) {
+                // Old article hiding behaviour
+                $(article).css({display: "none"});
+                continue;
+            }
+
+            // Minimisation of articles
+            var children = $(article).children();
+            $(article).children().each(function () {
+                if ($(this).is("div.header.module")) {
+                    $(this).after("<a class='bp-unhide-article' href='#' style='float: right'>Unhide non-bp work</a>")
+                    $(this).css({"min-height": 0});
+
+                    var article_title = $(this).children("h4.heading")[0];
+                    $(article_title).css({"margin-left": 0});
+
+                    var article_fandoms = $(this).children("h5.fandoms.heading")[0];
+                    $(article_fandoms).css({display: "none"});
+
+                    var article_req_tags = $(this).children("ul.required-tags")[0];
+                    $(article_req_tags).css({display: "none"});
+
+                    var article_datetime = $(this).children("p.datetime")[0];
+                    $(article_datetime).css({top: 0});
+
+                    return;
+                }
+
+                $(this).css({display: "none"});
+            });
+            $("a.bp-unhide-article").on("click", function (event) {
+                event.preventDefault();
+                var hidden_article = $(this).closest("li[role=article]");
+                $(hidden_article).children().each(function () {
+                    if ($(this).is("div.header.module")) {
+                        $(this).css({"min-height": ""});
+
+                        var article_title = $(this).children("h4.heading")[0];
+                        $(article_title).css({"margin-left": ""});
+
+                        var article_fandoms = $(this).children("h5.fandoms.heading")[0];
+                        $(article_fandoms).css({display: ""});
+
+                        var article_req_tags = $(this).children("ul.required-tags")[0];
+                        $(article_req_tags).css({display: ""});
+
+                        var article_datetime = $(this).children("p.datetime")[0];
+                        $(article_datetime).css({top: ""});
+                    }
+                    $(this).css({display: ""});
+                });
+                $(this).css({display: "none"});
+            });
+
         }
     }
 }
