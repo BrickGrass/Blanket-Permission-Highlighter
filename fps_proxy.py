@@ -3,7 +3,7 @@ import json
 
 from bs4 import BeautifulSoup
 from redis import Redis
-from flask import Flask, jsonify, g
+from flask import Flask, jsonify, g, request
 import psycopg2
 from psycopg2 import pool
 from typing import Optional
@@ -95,6 +95,33 @@ def create_app():
         author = fetch_author(username)
         return jsonify({"exists": author}), 200
 
+    @app.route("/bp_api/authors_exist", methods=["GET", "POST"])
+    def authors_exist():
+        content = request.get_json(silent=True)
+        if not content:
+            return "Invalid request, no authors provided", 400
+
+        try:
+            authors = content["authors"]
+        except KeyError:
+            return "Invalid request, no authors provided", 400
+
+        if type(authors) != list:
+            return "Invalid request, 'authors' must be a list", 400
+
+        authors = list(set(authors))  # Remove duplicates
+
+        message = {"exist": [], "dont_exist": []}
+
+        for username in authors:
+            exists = fetch_author(str(username))
+            if exists:
+                message["exist"].append(username)
+            else:
+                message["dont_exist"].append(username)
+
+        return jsonify(message), 200
+
     @app.route("/bp_api/author_data/<username>")
     def author_data(username):
         author = fetch_author_from_web(username)
@@ -104,7 +131,6 @@ def create_app():
 
         author["message"] = "found"
         return jsonify(author), 200
-
 
     @app.route("/bp_api/cache_health")
     def cache_health():
