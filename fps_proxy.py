@@ -85,7 +85,7 @@ def create_app():
         db = g.pop("db", None)
         if db is not None:
             # Relinquish all connections to db pool
-            app.config["postpreSQL_pool"].putconn(db)
+            app.config["postgreSQL_pool"].putconn(db)
 
     @app.route("/bp_api/author_exists/<username>")
     def author_exists(username):
