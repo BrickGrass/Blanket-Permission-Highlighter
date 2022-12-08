@@ -117,3 +117,5 @@ def create_app():
             "keys": redis_info.get("db0").get("keys"),
             "hit_miss_ratio": f"{(hits / (hits + misses)) * 100:.2f}%"
         }), 200
+
+    return app
