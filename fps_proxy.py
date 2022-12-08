@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 from redis import Redis
 from flask import Flask, jsonify, g
 import psycopg2
+from psycopg2 import pool
 from typing import Optional
 
 import fps_get
