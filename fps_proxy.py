@@ -57,13 +57,13 @@ def create_app():
         r.setex(username, cache_time, "n")
         return False
 
-
     def fetch_author_from_web(username: str) -> Optional[dict]:
-        """Discover if an author has an fpslist.org page
+        """Discover if an author has an fpslist.org page via web, cached in redis under data.<username>"""
+        username = username.lower()
+        author_page = r.get(f"data.{username}")
+        if author_page:
+            return None if author_page == b"n" else {"author": author_page.decode("utf-8")}
 
-        TODO: Might be a good idea to still cache this, just under a separate prefix from the other data.
-        data.<username> or something like that.
-        """
         try:
             data = sess.get_author(username)
         except fps_get.NonceExpiredError:
@@ -74,10 +74,12 @@ def create_app():
             for _, author_page, _, _, _, _ in data["data"]:
                 author_page = BeautifulSoup(author_page)
 
-                if author_page.string.lower() == username.lower():
+                if author_page.string.lower() == username:
                     author_data = author_page.a["href"]
+                    r.setex(f"data.{username}", cache_time, author_data)
                     return {"author": author_data}
 
+        r.setex(f"data.{username}", cache_time, "n")
         return None
 
     @app.teardown_appcontext
