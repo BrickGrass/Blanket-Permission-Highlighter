@@ -114,7 +114,8 @@ def create_app():
         message = {"exist": [], "dont_exist": []}
 
         for username in authors:
-            exists = fetch_author(str(username))
+            username = str(username)
+            exists = fetch_author(username)
             if exists:
                 message["exist"].append(username)
             else:

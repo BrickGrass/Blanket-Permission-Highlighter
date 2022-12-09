@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name         Blanket Permission highlighting
 // @namespace    https://brickgrass.uk
-// @version      2.1
+// @version      2.2
 // @description  Highlights authors on ao3 who have a blanket permission statement
 // @author       BrickGrass
 // @include      https://archiveofourown.org/*
-// @require      http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js
+// @require      http://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js
 // @require      https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js
 // @updateURL    https://raw.githubusercontent.com/BrickGrass/Blanket-Permission-Highlighter/master/highlight.pub.user.js
 // @downloadURL  https://raw.githubusercontent.com/BrickGrass/Blanket-Permission-Highlighter/master/highlight.pub.user.js
@@ -219,6 +219,36 @@ function readStorage(entry) {
     }
 }
 
+async function check_storage(username, context, callback) {
+    if (username === "orphan_account") {
+        if (orphan_bp_enabled) {
+            callback.call(context, {exists: true});
+            return true;
+        } else {
+            callback.call(context, {exists: false});
+            return true;
+        }
+    }
+
+    var entry = await GM.getValue(username);
+    entry = readStorage(entry);
+
+    if (entry.hasOwnProperty("exists") && entry.exists) {
+        if (entry.age > _1_day_ago) {
+            callback.call(context, {exists: true});
+            return true;
+        }
+    } else if (entry.hasOwnProperty("exists") && !entry.exists) {
+        if (entry.age > _1_day_ago) {
+            callback.call(context, {exists: false});
+            return true;
+        }
+    }
+
+    // user not found in cache and is not orphan account, api must be checked
+    return false;
+}
+
 async function bp_exists(username, context, callback) {
     if (username === "orphan_account") {
         if (orphan_bp_enabled) {
@@ -362,7 +392,7 @@ async function log_storage() {
     console.log(mapping);
 }
 
-$( document ).ready(function() {
+$( document ).ready(async function() {
     // Remove expired keys from storage
     clear_storage();
 
@@ -438,8 +468,33 @@ $( document ).ready(function() {
     });
 
     // Check all users found for bp
+    var not_in_storage = [];
     for (const [un, tags] of Object.entries(users)) {
-        bp_exists(un, {"tags": tags}, modify_style)
+        var in_storage = await check_storage(un, {"tags": tags}, modify_style);
+        if (!in_storage) {
+            not_in_storage.push(un);
+        }
+    }
+
+    if (not_in_storage.length != 0) {
+        $.ajax(
+            "https://brickgrass.uk/bp_api/authors_exist",
+            {
+                type: "POST",
+                data: JSON.stringify({authors: not_in_storage}),
+                contentType: 'application/json'
+            }
+        ).done(function(data) {
+            for (const un of data.exist) {
+                GM.setValue(un, JSON.stringify([true, Date.now()]));
+                modify_style.call({"tags": users[un]}, {"exists": un});
+            }
+
+            for (const un of data.dont_exist) {
+                GM.setValue(un, JSON.stringify([true, Date.now()]));
+                modify_style.call({"tags": users[un]}, {});
+            }
+        })
     }
 
     // If filtering is enabled, works by Anonymous users need to be hidden
