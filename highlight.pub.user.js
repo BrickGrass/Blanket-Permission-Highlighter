@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Blanket Permission highlighting
 // @namespace    https://brickgrass.uk
-// @version      2.3
+// @version      2.4
 // @description  Highlights authors on ao3 who have a blanket permission statement
 // @author       BrickGrass
 // @include      https://archiveofourown.org/*
@@ -488,7 +488,7 @@ $( document ).ready(async function() {
         }
     }
 
-    if (not_in_storage.length != 0) {
+    if (not_in_storage.length > 0) {
         $.ajax(
             "https://brickgrass.uk/bp_api/authors_exist",
             {
@@ -503,7 +503,7 @@ $( document ).ready(async function() {
             }
 
             for (const un of data.dont_exist) {
-                GM.setValue(un, JSON.stringify([true, Date.now()]));
+                GM.setValue(un, JSON.stringify([false, Date.now()]));
                 modify_style.call({"tags": users[un]}, {});
             }
         })
