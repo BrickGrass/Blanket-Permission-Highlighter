@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Blanket Permission highlighting
 // @namespace    https://brickgrass.uk
-// @version      2.2
+// @version      2.3
 // @description  Highlights authors on ao3 who have a blanket permission statement
 // @author       BrickGrass
 // @include      https://archiveofourown.org/*
@@ -381,6 +381,13 @@ async function clear_storage() {
     }
 }
 
+async function clear_all_storage() {
+    var values = await GM.listValues();
+    for (const value of values) {
+        GM.deleteValue(value);
+    }
+}
+
 async function log_storage() {
     var values = await GM.listValues();
     var mapping = {}
@@ -395,6 +402,11 @@ async function log_storage() {
 $( document ).ready(async function() {
     // Remove expired keys from storage
     clear_storage();
+    
+    // If storage is disabled, fully clear storage
+    if (!storage_enabled) {
+        clear_all_storage();
+    }
 
     // Add custom css
     let head = document.getElementsByTagName('head')[0];
