@@ -5,25 +5,39 @@ import psycopg2
 from bs4 import BeautifulSoup
 import requests
 
-FORM_DATA = {
+FORM_DATA_70 = {
     "draw": 1,
     "columns[0][data]": 0,
+    "columns[0][name]": "AIDpk",
+    "columns[0][searchable]": False,
+    "columns[0][orderable]": False,
+    "columns[0][search][value]": "",
+    "columns[0][search][regex]": False,
+    "columns[1][data]": 1,
+    "columns[1][name]": "AuthorsArtists",
+    "columns[1][searchable]": False,
+    "columns[1][orderable]": False,
+    "columns[1][search][value]": "",
+    "columns[1][search][regex]": False,
+    "start": 0,
+    "length": -1,
+    "search[value]": "",
+    "search[regex]": False
+}
+
+FORM_DATA_71 = {
+    "draw": 1,
+    "columns[0][data]": 0,
+    "columns[0][name]": "UpdatedDate",
     "columns[0][searchable]": True,
     "columns[0][orderable]": False,
     "columns[0][search][value]": "",
     "columns[0][search][regex]": False,
     "start": 0,
+    "length": 1,
     "search[value]": "",
     "search[regex]": False
 }
-
-FORM_DATA_70 = FORM_DATA.copy()
-FORM_DATA_70["columns[0][name]"] = "AuthorArtist"
-FORM_DATA_70["length"] = -1
-
-FORM_DATA_71 = FORM_DATA.copy()
-FORM_DATA_71["columns[0][name]"] = "UpdatedDate"
-FORM_DATA_71["length"] = 1
 
 # Since we're accessing config.json without it's full path, cron scripts using this file
 # need to cd to the directory containing this file first.
@@ -44,13 +58,18 @@ conn = psycopg2.connect(
 def create_database():
     """Create database table"""
     cur = conn.cursor()
-    cur.execute("CREATE TABLE IF NOT EXISTS users (username VARCHAR(255) UNIQUE NOT NULL);")
+    cur.execute("""CREATE TABLE IF NOT EXISTS users (
+        username VARCHAR(255) PRIMARY KEY,
+        fps_profile VARCHAR(255) UNIQUE NOT NULL);
+    """)
     conn.commit()
     cur.close()
 
 
 def populate_database(csv_name):
-    """Clear database and repopulate it from a csv file"""
+    """Clear database and repopulate it from a csv file
+
+    TODO: This code is out of date and will not work"""
     cur = conn.cursor()
 
     cur.execute("DELETE FROM users")
@@ -58,11 +77,14 @@ def populate_database(csv_name):
 
     with open(csv_name, newline="") as csv_file:
         csv_reader = csv.reader(csv_file)
-        # TODO: If this is slow, rewrite it to do it in a single insert, lol
         for row in csv_reader:
-            username = row[0]
+            user_data = BeautifulSoup(row[1])
+
+            username = user_data.string.lower()
+            fps_profile = user_data.a["href"]
+
             try:
-                cur.execute("INSERT INTO users (username) VALUES (%s)", (username.lower(),))
+                cur.execute("INSERT INTO users (username, fps_profile) VALUES (%s, %s)", (username, fps_profile))
             except psycopg2.UniqueViolation:
                 print(f"Ignoring duplicate user: {username.lower()}")
 
@@ -77,8 +99,15 @@ def populate_database_json(json_data):
     cur.execute("DELETE FROM users")
 
     for row in json_data["data"]:
-        username = row[0]
-        cur.execute("INSERT INTO users (username) VALUES (%s)", (username.lower(),))
+        user_data = BeautifulSoup(row[1])
+
+        username = user_data.string.lower()
+        fps_profile = user_data.a["href"]
+
+        try:
+            cur.execute("INSERT INTO users (username, fps_profile) VALUES (%s, %s)", (username, fps_profile))
+        except psycopg2.UniqueViolation:
+            print(f"Ignoring duplicate user: {username}")
 
     conn.commit()
     cur.close()
