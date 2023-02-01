@@ -1,7 +1,7 @@
 # Blanket-Permission-Highlighter
 
 This is a tampermonkey/greasemonkey extension which:
-1. Highlights ao3 users listed as having blanket permission in rindle's [fpslist](https://www.fpslist.org/) in green
+1. Highlights ao3 users listed as having blanket permission to podfic their works in rindle's [fpslist](https://www.fpslist.org/) in green
 2. Injects a link to the fpslist author profile page to their ao3 profile page
 3. Optionally filters out non-blanket permission author's works from search/bookmark results
 
