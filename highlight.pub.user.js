@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Blanket Permission highlighting
 // @namespace    https://brickgrass.uk
-// @version      2.5
+// @version      2.6
 // @description  Highlights authors on ao3 who have a blanket permission statement
 // @author       BrickGrass
 // @include      https://archiveofourown.org/*
@@ -250,13 +250,13 @@ $(document).ready(async function() {
     }
 
     // If filtering is enabled, works by Anonymous users need to be hidden
-    if (filtering_enabled) {
+    if (filtering_enabled && !orphan_bp_enabled) {
         $("li[role=article]").each(function() {
             let heading = $(this).find("h4.heading");
             let text = heading.text();
-            text = text.replace(/\r?\n|\r/g, ""); // remove newlines
+            text = text.replace(/\r?\n|\r/g, " "); // remove newlines
             text = text.replace(/  +/g, " "); // multiple spaces -> single space
-            if (text.includes("by Anonymous")) {
+          	if (text.includes("by Anonymous")) {
                 minimise_article(this);
                 // $(this).css({display: "none"});
             }
