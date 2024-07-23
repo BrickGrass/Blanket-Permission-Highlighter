@@ -19,8 +19,9 @@ Settings menu
 # Installation
 
 1. Install [Tampermonkey](https://www.tampermonkey.net/) or [Greasemonkey](https://www.greasespot.net/)
-2. Click this [link](https://raw.githubusercontent.com/BrickGrass/Blanket-Permission-Highlighter/master/highlight.pub.user.js) to install the highlight extension
-3. Enjoy!
+2. (Chrome only) Due to the Chrome manifest v3 update, if you are using Chrome or a Chromium based browser you may need to enable developer mode for Tampermonkey to function correctly! See: https://www.tampermonkey.net/faq.php?locale=en#Q209 for instructions. A native Chrome version of the extension is in the works, as this isn't exactly ideal.
+3. Click this [link](https://raw.githubusercontent.com/BrickGrass/Blanket-Permission-Highlighter/master/highlight.pub.user.js) to install the highlight extension
+4. Enjoy!
 
 You can contact me at BrickGrass#8455 on discord or @rustyshvl on twitter if you can't get it working and a github issue isn't appropriate.
 
