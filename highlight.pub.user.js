@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Blanket Permission highlighting
 // @namespace    https://brickgrass.uk
-// @version      2.6
+// @version      2.7
 // @description  Highlights authors on ao3 who have a blanket permission statement
 // @author       BrickGrass
 // @include      https://archiveofourown.org/*
@@ -200,18 +200,29 @@ $(document).ready(async function() {
     $("a").each(function() {
         let m = this.href.match(user_regex);
 
+      	// No match
         if (m === null) {
             return;
         }
 
-        if (!this.text.includes(m[1])) {
-            return;
+      	if (m[3] != undefined) {
+            // Check using specific pseudonym
+            if (!this.text.includes(decodeURI(m[3]))) {
+                return;
+            }
+        } else {
+            // No pseudonym, check using username
+            if (!this.text.includes(decodeURI(m[1]))) {
+                return;
+            }
         }
 
+        // Don't highlight usersnames that only appear in the kudos section
         if($(this).parents("#kudos").length > 0) {
             return;
         }
 
+        // Push username (not pseudonym) to list of users, no duplicates
         if (users.hasOwnProperty(m[1])) {
             users[m[1]].push(this);
         } else {

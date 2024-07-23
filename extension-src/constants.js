@@ -1,5 +1,5 @@
 const _1_day_ago = Date.now() - 24 * 60 * 60 * 1000
-const user_regex = /https:\/\/archiveofourown\.org\/users\/([^/]+)/;
+const user_regex = /https:\/\/archiveofourown\.org\/users\/([^/]+)(\/pseuds\/([^/]+))?/;
 
 const bp_settings_html = `
 <div id="bp-settings">
