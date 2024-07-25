@@ -1,53 +1,34 @@
-// ==UserScript==
-// @name         Blanket Permission highlighting
-// @namespace    https://brickgrass.uk
-// @version      2.7
-// @description  Highlights authors on ao3 who have a blanket permission statement
-// @author       BrickGrass
-// @include      https://archiveofourown.org/*
-// @require      http://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js
-// @require      https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js
-// @updateURL    https://raw.githubusercontent.com/BrickGrass/Blanket-Permission-Highlighter/master/highlight.pub.user.js
-// @downloadURL  https://raw.githubusercontent.com/BrickGrass/Blanket-Permission-Highlighter/master/highlight.pub.user.js
-// @grant        GM.setValue
-// @grant        GM.getValue
-// @grant        GM.listValues
-// @grant        GM.deleteValue
-// @grant        GM.registerMenuCommand
-// @require      https://raw.githubusercontent.com/BrickGrass/Blanket-Permission-Highlighter/master/extension-src/constants.js
-// @require      https://raw.githubusercontent.com/BrickGrass/Blanket-Permission-Highlighter/master/extension-src/cookies.js
-// @require      https://raw.githubusercontent.com/BrickGrass/Blanket-Permission-Highlighter/master/extension-src/caching.js
-// @require      https://raw.githubusercontent.com/BrickGrass/Blanket-Permission-Highlighter/master/extension-src/settings.js
-// @require      https://raw.githubusercontent.com/BrickGrass/Blanket-Permission-Highlighter/master/extension-src/waitForKeyElements.js
-// ==/UserScript==
+// TODO: query all settings and set up change monitoring to keep them updated?
+// Will need to see how often they're getting accessed in-code. See cookies.js for how I'd do that
+// A benefit will be that it would be possible to re-run highlighting/filtering without a page reload, but that would be a lot of work lmao
 
 var users = {};
 
-// Checks if a user is in the local cache, returns true if user found in cache, false if not
+// Checks if a user is in the local cache, returns true if user is found in cache, false if not
 // If the user is in the cache, the callback is called with exists to set their bp status
 async function check_storage(username, context, callback) {
     if (username === "orphan_account") {
+        const result = await chrome.storage.sync.get(["bp_orphan_enabled"]);
+        const orphan_bp_enabled = result.bp_orphan_enabled !== undefined ? result.bp_orphan_enabled : false;
+        console.log(`orphan_bp_enabled: ${orphan_bp_enabled}`);
         callback.call(context, {exists: orphan_bp_enabled});
         return true;
     }
 
-    var entry = await GM.getValue(username);
-    entry = read_storage(entry);
-
-    if (entry.hasOwnProperty("exists") && entry.exists) {
-        if (entry.age > _1_day_ago) {
-            callback.call(context, {exists: true});
-            return true;
-        }
-    } else if (entry.hasOwnProperty("exists") && !entry.exists) {
-        if (entry.age > _1_day_ago) {
-            callback.call(context, {exists: false});
-            return true;
-        }
+    const result = await chrome.storage.local.get([username]);
+    if (!result.hasOwnProperty(username)) {
+        // user not found in cache and is not orphan account, api must be checked
+        return false;
     }
 
-    // user not found in cache and is not orphan account, api must be checked
-    return false;
+    if (result[username].age <= _1_day_ago) {
+        // cached data has expired, api must be checked
+        return false;
+    }
+
+    // valid cached data, no need to query api
+    callback.call(context, { exists: result[username].exists });
+    return true;
 }
 
 // Checks the local cache and then the single user api endpoint to see if a user has bp
@@ -63,9 +44,9 @@ async function bp_exists(username, context, callback) {
     ).done(callback).done(function(data) {
         if (storage_enabled) {
             if (data.exists) {
-                GM.setValue(username, JSON.stringify([true, Date.now()]));
+                chrome.storage.local.set({ [username]: { exists: true, age: Date.now() } });
             } else {
-                GM.setValue(username, JSON.stringify([false, Date.now()]));
+                chrome.storage.local.set({ [username]: { exists: false, age: Date.now() } });
             }
         }
     });
@@ -78,11 +59,13 @@ function bp_fetch(username, callback) {
     ).done(callback);
 }
 
-function minimise_article(article) {
+async function minimise_article(article) {
+    const result = await chrome.storage.sync.get(["bp_minimise_articles"]);
+    const minimise_articles = result.bp_minimise_articles !== undefined ? result.bp_minimise_articles : true;
     if (!minimise_articles) {
         // Old article hiding behaviour
         $(article).css({display: "none"});
-        return
+        return;
     }
 
     // Minimisation of articles
@@ -134,7 +117,11 @@ function minimise_article(article) {
 }
 
 // Highlights the username links of bp authors, and minimises/hides works based on filtering settings
-function modify_style(data) {
+async function modify_style(data) {
+    const result = await chrome.storage.sync.get(["bp_highlight_colour", "bp_filtering_enabled"]);
+    const filtering_enabled = result.bp_filtering_enabled !== undefined ? result.bp_filtering_enabled : false;
+    const highlight_colour = result.bp_highlight_colour !== undefined ? result.bp_highlight_colour : "#0f782d";
+
     if (data.exists) {
         for (const tag of this.tags) {
             $(tag).css({color: highlight_colour});
@@ -156,22 +143,13 @@ function modify_style(data) {
 }
 
 $(document).ready(async function() {
+    const result = await chrome.storage.sync.get(["bp_filtering_enabled", "bp_orphan_enabled"]);
+    const filtering_enabled = result.bp_filtering_enabled !== undefined ? result.bp_filtering_enabled : false;
+    const orphan_bp_enabled = result.bp_orphan_enabled !== undefined ? result.bp_orphan_enabled : false;
+
+    // TODO: move this to scheduled background task? It's inefficient to run this on every page load.
     // Remove expired keys from storage
     clear_storage();
-
-    // If storage is disabled, fully clear storage
-    if (!storage_enabled) {
-        clear_all_storage();
-    }
-
-    // Add custom css
-    let head = document.getElementsByTagName('head')[0];
-    if (head) {
-        let style = document.createElement('style');
-        style.setAttribute('type', 'text/css');
-        style.textContent = css;
-        head.appendChild(style);
-    }
 
     // Add filter to ao3 filter form, update cookie on every change event
     $(".filters .options > ul").append(ao3_filter_html);
@@ -181,14 +159,9 @@ $(document).ready(async function() {
 
     $("#bp_filter").prop("checked", filtering_enabled);
     $("#bp_filter").change(function() {
-        filtering_enabled = this.checked;
-        set_bool_cookie("bp_filtering_enabled", filtering_enabled);
+            chrome.storage.sync.set({ bp_filtering_enabled: this.checked });
         }
     );
-
-    if (storage_enabled_str === undefined) {
-        storage_undefined();
-    }
 
     // Find all mentions of archive users by iterating all links in page
     $("a").each(function() {
@@ -211,7 +184,7 @@ $(document).ready(async function() {
             }
         }
 
-        // Don't highlight usersnames that only appear in the kudos section
+        // Don't highlight usernames that only appear in the kudos section
         if($(this).parents("#kudos").length > 0) {
             return;
         }
@@ -243,12 +216,12 @@ $(document).ready(async function() {
             }
         ).done(function(data) {
             for (const un of data.exist) {
-                GM.setValue(un, JSON.stringify([true, Date.now()]));
+                chrome.storage.local.set({ [un]: { exists: true, age: Date.now() } });
                 modify_style.call({"tags": users[un]}, {"exists": un});
             }
 
             for (const un of data.dont_exist) {
-                GM.setValue(un, JSON.stringify([false, Date.now()]));
+                chrome.storage.local.set({ [un]: { exists: false, age: Date.now() } });
                 modify_style.call({"tags": users[un]}, {});
             }
         })
@@ -263,7 +236,6 @@ $(document).ready(async function() {
             text = text.replace(/  +/g, " "); // multiple spaces -> single space
           	if (text.includes("by Anonymous")) {
                 minimise_article(this);
-                // $(this).css({display: "none"});
             }
         });
     }
@@ -275,7 +247,6 @@ $(document).ready(async function() {
     }
 
     bp_fetch(m[1], function(data) {
-        console.log(data);
         if (data.message === "not found") {
             return
         }

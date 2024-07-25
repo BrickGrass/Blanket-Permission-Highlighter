@@ -1,0 +1,52 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      #bp-settings-content {
+        background-color: #fff;
+        color: #2a2a2a;
+        padding: 5px;
+        min-width: 200px;
+        min-height: 100px;
+      }
+
+      #bp-settings-content h2 {
+        margin: 0;
+      }
+
+      #bp-settings a {
+        color: #111;
+      }
+
+      #bp-settings a:hover {
+        color: #999;
+      }
+
+      #bp-settings input[type="submit"] {
+        margin-top: 5px;
+      }
+    </style>
+    <script src="third_party/jquery-3.6.1-min.js"></script>
+    <script src="scripts/cookies.js"></script>
+  </head>
+  <body>
+    <div id="bp-settings">
+      <div id="bp-settings-content">
+        <h2>Blanket Permission Highlighter Settings</h2>
+        <form>
+          <input type="checkbox" id="enable-filter" name="enable-filter">
+          <label for="enable-filter">Enable Filtering Of Non-Blanket Permission User's Works</label><br>
+          <input type="checkbox" id="enable-minimisation" name="enable-minimisation">
+          <label for="enable-minimisation">Enable Minimisation Of Non-Blanket Permission User's Works</label><br>
+          <input type="checkbox" id="enable-orphan-bp" name="enable-orphan-bp">
+          <label for="enable-orphan-bp">Enable Treating The AO3 orphan_account As Having Blanket Permission</label><br>
+          <input type="color" id="colour" name="colour">
+          <label for="colour">Choose Highlight Colour</label><br>
+        </form>
+      </div>
+    </div>
+    <script src="scripts/settings.js"></script>
+  </body>
+</html>
