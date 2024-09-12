@@ -1,6 +1,6 @@
 # Blanket-Permission-Highlighter
 
-This is a tampermonkey/greasemonkey extension which:
+This is a browser extension which:
 1. Highlights ao3 users listed as having blanket permission to podfic their works in rindle's [fpslist](https://www.fpslist.org/) in green
 2. Injects a link to the fpslist author profile page to their ao3 profile page
 3. Optionally filters out non-blanket permission author's works from search/bookmark results
@@ -18,10 +18,13 @@ Settings menu
 
 # Installation
 
+If you are using Chrome, there is a native extension which can be found [here](https://chromewebstore.google.com/detail/blanket-permission-highli/bjokglmkmgdkonppimgbdkaphoaojhbj).
+
+If you are using any other browser, follow these instructions:
+
 1. Install [Tampermonkey](https://www.tampermonkey.net/) or [Greasemonkey](https://www.greasespot.net/)
-2. (Chrome only) Due to the Chrome manifest v3 update, if you are using Chrome or a Chromium based browser you may need to enable developer mode for Tampermonkey to function correctly! See: https://www.tampermonkey.net/faq.php?locale=en#Q209 for instructions. A native Chrome version of the extension is in the works, as this isn't exactly ideal.
-3. Click this [link](https://raw.githubusercontent.com/BrickGrass/Blanket-Permission-Highlighter/master/highlight.pub.user.js) to install the highlight extension
-4. Enjoy!
+2. Click this [link](https://raw.githubusercontent.com/BrickGrass/Blanket-Permission-Highlighter/master/highlight.pub.user.js) to install the highlight extension
+3. Enjoy!
 
 You can contact me at BrickGrass#8455 on discord or @rustyshvl on twitter if you can't get it working and a github issue isn't appropriate.
 
