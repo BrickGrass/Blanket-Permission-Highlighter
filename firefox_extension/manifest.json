@@ -1,0 +1,35 @@
+{
+    "manifest_version": 3,
+    "name": "Blanket Permission Highlighter",
+    "description": "Highlights AO3 users listed as having blanket permission to podfic their works in green, as per Rindle's https://www.fpslist.org/.",
+    "version": "1.0",
+    "author": "goblin.faces@gmail.com",
+    "action": {
+        "default_popup": "settings.html",
+        "default_icon": "images/icon-128.png"
+    },
+    "icons": {
+        "16": "images/icon-16.png",
+        "32": "images/icon-32.png",
+        "48": "images/icon-48.png",
+        "128": "images/icon-128.png"
+    },
+    "content_scripts": [{
+        "js": [
+            "third_party/jquery-3.6.1-min.js",
+            "third_party/waitForKeyElements.js",
+            "scripts/constants.js",
+            "scripts/caching.js",
+            "scripts/highlight.js"
+        ],
+        "matches": ["https://archiveofourown.org/*"],
+        "run_at": "document_end"
+    }],
+    "permissions": ["storage"],
+    "browser_specific_settings": {
+        "gecko": {
+            "id": "blanketpermissionhighlighter@brickgrass.uk",
+            "strict_min_version": "109.0"
+        }
+    }
+}
