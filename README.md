@@ -26,7 +26,7 @@ If you are using any other browser, follow these instructions:
 2. Click this [link](https://raw.githubusercontent.com/BrickGrass/Blanket-Permission-Highlighter/master/highlight.pub.user.js) to install the highlight extension
 3. Enjoy!
 
-You can contact me at BrickGrass#8455 on discord or @rustyshvl on twitter if you can't get it working and a github issue isn't appropriate.
+You can contact me at BrickGrass#8455 on discord or at goblin.faces.gmail.com if you can't get it working and a github issue isn't appropriate.
 
 # Extra Installation!
 
