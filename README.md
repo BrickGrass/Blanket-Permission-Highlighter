@@ -11,14 +11,10 @@ Extension working
 
 ![alt text](https://brickgrass.uk/media/images/fps_ext_example.png "Example of extension working on ao3")
 
-Settings menu
-
-![alt text](https://brickgrass.uk/media/images/tampermonkey_menu.png "Tampermonkey menu showing option to open settings for the highlighter extension")
-![alt text](https://brickgrass.uk/media/images/bph_settings.png? "The settings menu for the extension")
-
 # Installation
 
-If you are using Chrome, there is a native extension which can be found [here](https://chromewebstore.google.com/detail/blanket-permission-highli/bjokglmkmgdkonppimgbdkaphoaojhbj).
+* Native Chrome extension [here](https://chromewebstore.google.com/detail/blanket-permission-highli/bjokglmkmgdkonppimgbdkaphoaojhbj)
+* Native Firefox extension [here](https://addons.mozilla.org/en-GB/firefox/addon/blanket-permission-highlighter/)
 
 If you are using any other browser, follow these instructions:
 
