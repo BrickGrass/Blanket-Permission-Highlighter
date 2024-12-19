@@ -99,7 +99,7 @@ def populate_database_json(json_data):
     cur.execute("DELETE FROM users")
 
     for row in json_data["data"]:
-        user_data = BeautifulSoup(row[1])
+        user_data = BeautifulSoup(row[1], features="html.parser")
 
         username = user_data.string.lower()
         fps_profile = user_data.a["href"]
