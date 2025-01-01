@@ -8,15 +8,12 @@ import psycopg2
 from psycopg2 import pool
 from typing import Optional
 
-import fps_get
-
 with open("config.json") as f:
     data = json.load(f)
     database_name = data["database_name"]
     database_username = data["database_username"]
     database_password = data["database_password"]
 
-sess = fps_get.Session()
 cache_time = timedelta(days=2)
 r = Redis()
 
