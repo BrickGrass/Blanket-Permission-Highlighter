@@ -78,7 +78,6 @@ def create_app():
 
     @app.teardown_appcontext
     def close_conn(e):
-        print("Closing database connection")
         db = g.pop("db", None)
         if db is not None:
             # Relinquish all connections to db pool
