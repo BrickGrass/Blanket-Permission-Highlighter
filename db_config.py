@@ -66,10 +66,17 @@ def create_database():
     cur.close()
 
 
-def populate_database(csv_name):
-    """Clear database and repopulate it from a csv file
+def query_database():
+    """Quickly see what's in the db"""
+    cur = conn.cursor()
+    cur.execute("SELECT username FROM users;")
+    for row in cur:
+        print(row)
+    cur.close()
 
-    TODO: This code is out of date and will not work"""
+
+def populate_database(csv_name):
+    """Clear database and repopulate it from a csv file"""
     cur = conn.cursor()
 
     cur.execute("DELETE FROM users")
@@ -78,13 +85,10 @@ def populate_database(csv_name):
     with open(csv_name, newline="") as csv_file:
         csv_reader = csv.reader(csv_file)
         for row in csv_reader:
-            user_data = BeautifulSoup(row[1])
-
-            username = user_data.string.lower()
-            fps_profile = user_data.a["href"]
+            username = row[0]
 
             try:
-                cur.execute("INSERT INTO users (username, fps_profile) VALUES (%s, %s)", (username, fps_profile))
+                cur.execute("INSERT INTO users (username) VALUES (%s)", (username,))
             except psycopg2.UniqueViolation:
                 print(f"Ignoring duplicate user: {username.lower()}")
 
