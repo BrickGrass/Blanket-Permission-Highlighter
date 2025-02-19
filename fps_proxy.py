@@ -54,29 +54,6 @@ def create_app():
         r.setex(username, cache_time, "n")
         return False
 
-    def fetch_author_profile(username: str) -> Optional[dict]:
-        """Discover if an author has an fpslist.org page from the local database and redis cache"""
-        # username = username.lower()
-
-        # author_page = r.get(f"data.{username}")
-        # if author_page:
-        #     return None if author_page == b"n" else {"author": author_page.decode("utf-8")}
-
-        # db = get_db()
-        # cur = db.cursor()
-        # cur.execute("SELECT fps_profile FROM users WHERE username = %s", (username,))
-        # row = cur.fetchone()
-        # cur.close()
-
-        # if row:
-        #     author_page = row[0]
-        #     r.setex(f"data.{username}", cache_time, author_page)
-        #     return {"author": author_page}
-
-        # r.setex(f"data.{username}", cache_time, "n")
-        # TODO: author/artist pages are gone temporarily, return None for everyone until Rindle brings them back
-        return None
-
     @app.teardown_appcontext
     def close_conn(e):
         db = g.pop("db", None)
@@ -119,13 +96,15 @@ def create_app():
 
     @app.route("/bp_api/author_data/<username>")
     def author_data(username):
-        author = fetch_author_profile(username)
+        exists = fetch_author(username)
 
-        if not author:
-            return jsonify({"message": "not found"}), 201
+        if exists:
+            return jsonify({
+                "author": f"https://fpslist.org/authorsartists/author-info/?AuthorArtist={username}",
+                "message": "found"
+            }), 200
 
-        author["message"] = "found"
-        return jsonify(author), 200
+        return jsonify({"message": "not found"}), 201
 
     @app.route("/bp_api/cache_health")
     def cache_health():
