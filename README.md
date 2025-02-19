@@ -14,7 +14,7 @@ Extension working
 # Installation
 
 * Native Chrome extension [here](https://chromewebstore.google.com/detail/blanket-permission-highli/bjokglmkmgdkonppimgbdkaphoaojhbj)
-* Native Firefox extension [here](https://addons.mozilla.org/en-GB/firefox/addon/blanket-permission-highlighter/)
+* Native Firefox extension [here](https://addons.mozilla.org/en-GB/firefox/addon/blanket-permission-highlighter/) (Now compatible with Firefox for Android!)
 
 If you are using any other browser, follow these instructions:
 
