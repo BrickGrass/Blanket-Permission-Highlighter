@@ -8,15 +8,12 @@ import psycopg2
 from psycopg2 import pool
 from typing import Optional
 
-import fps_get
-
 with open("config.json") as f:
     data = json.load(f)
     database_name = data["database_name"]
     database_username = data["database_username"]
     database_password = data["database_password"]
 
-sess = fps_get.Session()
 cache_time = timedelta(days=2)
 r = Redis()
 
@@ -59,29 +56,29 @@ def create_app():
 
     def fetch_author_profile(username: str) -> Optional[dict]:
         """Discover if an author has an fpslist.org page from the local database and redis cache"""
-        username = username.lower()
+        # username = username.lower()
 
-        author_page = r.get(f"data.{username}")
-        if author_page:
-            return None if author_page == b"n" else {"author": author_page.decode("utf-8")}
+        # author_page = r.get(f"data.{username}")
+        # if author_page:
+        #     return None if author_page == b"n" else {"author": author_page.decode("utf-8")}
 
-        db = get_db()
-        cur = db.cursor()
-        cur.execute("SELECT fps_profile FROM users WHERE username = %s", (username,))
-        row = cur.fetchone()
-        cur.close()
+        # db = get_db()
+        # cur = db.cursor()
+        # cur.execute("SELECT fps_profile FROM users WHERE username = %s", (username,))
+        # row = cur.fetchone()
+        # cur.close()
 
-        if row:
-            author_page = row[0]
-            r.setex(f"data.{username}", cache_time, author_page)
-            return {"author": author_page}
+        # if row:
+        #     author_page = row[0]
+        #     r.setex(f"data.{username}", cache_time, author_page)
+        #     return {"author": author_page}
 
-        r.setex(f"data.{username}", cache_time, "n")
+        # r.setex(f"data.{username}", cache_time, "n")
+        # TODO: author/artist pages are gone temporarily, return None for everyone until Rindle brings them back
         return None
 
     @app.teardown_appcontext
     def close_conn(e):
-        print("Closing database connection")
         db = g.pop("db", None)
         if db is not None:
             # Relinquish all connections to db pool
