@@ -1,7 +1,7 @@
-bs4
-flask
-requests
+bs4==0.0.2
+flask==2.2.5
+requests==2.31.0
 gunicorn[eventlet]
-redis
+redis==5.0.8
 sentry-sdk[flask]
-psycopg2
+psycopg2==2.9.9

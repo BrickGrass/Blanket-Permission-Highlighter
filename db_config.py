@@ -87,12 +87,12 @@ def populate_database(csv_name):
     with open(csv_name, newline="") as csv_file:
         csv_reader = csv.reader(csv_file)
         for row in csv_reader:
-            username = row[0]
+            username = row[0].lower()
 
             try:
                 cur.execute("INSERT INTO users (username) VALUES (%s)", (username,))
             except psycopg2.UniqueViolation:
-                print(f"Ignoring duplicate user: {username.lower()}")
+                print(f"Ignoring duplicate user: {username}")
 
     conn.commit()
     cur.close()
@@ -103,6 +103,7 @@ def populate_database_json(json_data):
     cur = conn.cursor()
 
     cur.execute("DELETE FROM users")
+    conn.commit()
 
     for row in json_data["data"]:
         username = row[1].lower()
