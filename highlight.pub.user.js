@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Blanket Permission highlighting
 // @namespace    https://brickgrass.uk
-// @version      2.7
+// @version      2.8
 // @description  Highlights authors on ao3 who have a blanket permission statement
 // @author       BrickGrass
 // @include      https://archiveofourown.org/*
@@ -281,7 +281,7 @@ $(document).ready(async function() {
         }
 
         $("#dashboard ul").first().append(
-            `<li><a href="${data.author}?target=blank">FPS List Entry</a></li>`
+            `<li><a href="${data.author}&target=blank">FPS List Entry</a></li>`
         )
     });
 });

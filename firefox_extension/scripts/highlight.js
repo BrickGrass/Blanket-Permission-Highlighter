@@ -252,7 +252,7 @@ $(document).ready(async function() {
         }
 
         $("#dashboard ul").first().append(
-            `<li><a href="${data.author}?target=blank">FPS List Entry</a></li>`
+            `<li><a href="${data.author}&target=blank">FPS List Entry</a></li>`
         )
     });
 });

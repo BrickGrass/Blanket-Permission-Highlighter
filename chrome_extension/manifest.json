@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "Blanket Permission Highlighter",
     "description": "Highlights AO3 users listed as having blanket permission to podfic their works in green, as per Rindle's https://www.fpslist.org/.",
-    "version": "1.0",
+    "version": "1.1",
     "author": "goblin.faces@gmail.com",
     "action": {
         "default_popup": "settings.html",
