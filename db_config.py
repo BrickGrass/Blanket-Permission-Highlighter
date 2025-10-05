@@ -110,7 +110,7 @@ def write_to_disk(json_data):
     all_authors_artists = {"data": [{"author_artist_name": name} for name in all_authors_artists]}
 
     with open("all_authors_artists.json", "w") as f:
-        json.dump(all_authors_artists)
+        json.dump(all_authors_artists, f)
 
 
 class Session:
