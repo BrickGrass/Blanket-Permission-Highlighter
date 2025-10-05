@@ -27,20 +27,6 @@ FORM_DATA_4 = {
     "search[regex]": False
 }
 
-# FORM_DATA_71 = {
-#     "draw": 1,
-#     "columns[0][data]": 0,
-#     "columns[0][name]": "UpdatedDate",
-#     "columns[0][searchable]": True,
-#     "columns[0][orderable]": False,
-#     "columns[0][search][value]": "",
-#     "columns[0][search][regex]": False,
-#     "start": 0,
-#     "length": 1,
-#     "search[value]": "",
-#     "search[regex]": False
-# }
-
 # Since we're accessing config.json without it's full path, cron scripts using this file
 # need to cd to the directory containing this file first.
 with open("config.json") as f:
@@ -145,20 +131,9 @@ class Session:
 
         soup = BeautifulSoup(nonce_request.text, features="html.parser")
         nonce_4 = soup.find("input", id="wdtNonceFrontendServerSide_4")["value"]
-        # nonce_71 = soup.find("input", id="wdtNonceFrontendEdit_71")["value"]
-
-        # last_updated = self.get_wdtable(FORM_DATA_71, nonce_71, 71)["data"][0][0]
-        # if last_updated == prev_last_updated:
-        #     return
 
         data = self.get_wdtable(FORM_DATA_4, nonce_4, 4)
         populate_database_json(data)
-
-        # print(f"Remote was updated at {last_updated}, database updated.")
-
-        # with open("config.json", "w") as f:
-        #     config_data["last_updated"] = last_updated
-        #     json.dump(config_data, f)
 
 
 if __name__ == "__main__":
