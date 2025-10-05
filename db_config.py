@@ -1,5 +1,6 @@
 import csv
 import json
+import time
 
 import psycopg2
 from bs4 import BeautifulSoup
@@ -105,11 +106,11 @@ def populate_database_json(json_data):
 
 def write_to_disk(json_data):
     """Write all data to a json file on disk"""
-    all_authors_artists = [row[1] for row in json_data["data"]]
-    all_authors_artists = {"data": [{
+    all_authors_artists = {"scraped_at": int(time.time())}
+    all_authors_artists["data"] = [{
         "primary_key": int(row[0].replace(",", "")),
         "author_artist_name": row[1]
-    } for row in json_data["data"]]}
+    } for row in json_data["data"]]
 
     with open("all_authors_artists.json", "w") as f:
         json.dump(all_authors_artists, f)
@@ -143,8 +144,11 @@ class Session:
 
         soup = BeautifulSoup(nonce_request.text, features="html.parser")
         nonce_4 = soup.find("input", id="wdtNonceFrontendServerSide_4")["value"]
-
         data = self.get_wdtable(FORM_DATA_4, nonce_4, 4)
+
+        if len(data["data"]) == 0:
+            raise AssertionError("No rows recieved, scrape ignored")
+
         populate_database_json(data)
         write_to_disk(data)
 
