@@ -105,9 +105,11 @@ def populate_database_json(json_data):
 
 def write_to_disk(json_data):
     """Write all data to a json file on disk"""
-    all_authors_artists = [row[1].lower() for row in json_data["data"]]
-    all_authors_artists = list(set(all_authors_artists))
-    all_authors_artists = {"data": [{"author_artist_name": name} for name in all_authors_artists]}
+    all_authors_artists = [row[1] for row in json_data["data"]]
+    all_authors_artists = {"data": [{
+        "primary_key": int(row[0].replace(",", "")),
+        "author_artist_name": row[1]
+    } for row in json_data["data"]]}
 
     with open("all_authors_artists.json", "w") as f:
         json.dump(all_authors_artists, f)
