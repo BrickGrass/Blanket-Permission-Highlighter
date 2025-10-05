@@ -103,6 +103,16 @@ def populate_database_json(json_data):
     cur.close()
 
 
+def write_to_disk(json_data):
+    """Write all data to a csv file on disk"""
+    all_authors_artists = [row[1].lower() for row in json_data["data"]]
+    all_authors_artists = list(set(all_authors_artists))
+    all_authors_artists = {"data": [{"author_artist_name": name} for name in all_authors_artists]}
+
+    with open("all_authors_artists.json", "w") as f:
+        json.dump(all_authors_artists)
+
+
 class Session:
     remote = "https://www.fpslist.org/wp-admin/admin-ajax.php"
     hdrs = {
@@ -134,6 +144,7 @@ class Session:
 
         data = self.get_wdtable(FORM_DATA_4, nonce_4, 4)
         populate_database_json(data)
+        write_to_disk(data)
 
 
 if __name__ == "__main__":
