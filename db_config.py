@@ -104,7 +104,7 @@ def populate_database_json(json_data):
 
 
 def write_to_disk(json_data):
-    """Write all data to a csv file on disk"""
+    """Write all data to a json file on disk"""
     all_authors_artists = [row[1].lower() for row in json_data["data"]]
     all_authors_artists = list(set(all_authors_artists))
     all_authors_artists = {"data": [{"author_artist_name": name} for name in all_authors_artists]}
