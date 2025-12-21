@@ -111,6 +111,11 @@ def create_app():
         redis_info = r.info()
         hits = redis_info.get("keyspace_hits")
         misses = redis_info.get("keyspace_misses")
+        if hits or misses:
+            hit_miss_ratio = f"{(hits / (hits + misses)) * 100:.2f}%"
+        else:
+            hit_miss_ratio = "N/A"
+        
         return jsonify({
             "hits": hits,
             "misses": misses,
@@ -118,7 +123,7 @@ def create_app():
             "evicted_keys": redis_info.get("evicted_keys"),
             "expired_keys": redis_info.get("expired_keys"),
             "keys": redis_info.get("db0").get("keys"),
-            "hit_miss_ratio": f"{(hits / (hits + misses)) * 100:.2f}%"
+            "hit_miss_ratio": hit_miss_ratio
         }), 200
 
     return app
