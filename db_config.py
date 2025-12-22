@@ -9,7 +9,7 @@ import requests
 FORM_DATA_4 = {
     "draw": 1,
     "columns[0][data]": 0,
-    "columns[0][name]": "autid",
+    "columns[0][name]": "AIDpk",
     "columns[0][searchable]": True,
     "columns[0][orderable]": True,
     "columns[0][search][value]": "",
